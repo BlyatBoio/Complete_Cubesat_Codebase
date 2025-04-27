@@ -23,5 +23,5 @@ Bootloading on the raspberry pi pico is quite simple, but very easy to get wrong
     rename fseventd to .fseventd (github doesent like uploading files with . at the start)
     hit CTRL S for good luck, unplug replug in the Pico and it should be functional
 
-IMPORTANT: USE THE EXACT FILE INCLUDED IN THIS REPOSITORY OR VERSION:__ NO OTHER VERSION OF THE BOOT LOADER WILL FUNCITON WITH THE REST OF THE CODEBASE!!!!
+IMPORTANT: USE THE EXACT FILE INCLUDED IN THIS REPOSITORY OR VERSION:8.0.3 NO OTHER VERSION OF THE BOOT LOADER WILL FUNCITON WITH THE REST OF THE CODEBASE!!!!
 EVEN THE .UTF FROM THE PI-PICO SITE ITSELF WILL DOWNLOAD AN INCOMPATABLE VERSION
