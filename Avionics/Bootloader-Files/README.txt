@@ -20,8 +20,8 @@ Bootloading on the raspberry pi pico is quite simple, but very easy to get wrong
     Delete any files that are pre-installed with micropython onto the hard-drive of the pico
     These may look similar to what eventaually ends up on there but just delete them
     Go into the exemplar-cubesat-files folder and drag every file from it into the pico
-    rename fseventd to .fseventd (github doesent like uploading files with . at the start)
-    hit CTRL S for good luck, unplug replug in the Pico and it should be functional
+    Rename fseventd to .fseventd and _code to ._code (github doesent like uploading files with . at the start)
+    Hit CTRL S for good luck, unplug replug in the Pico and it should be functional
 
 IMPORTANT: USE THE EXACT FILE INCLUDED IN THIS REPOSITORY OR VERSION:8.0.3 NO OTHER VERSION OF THE BOOT LOADER WILL FUNCITON WITH THE REST OF THE CODEBASE!!!!
 EVEN THE .UTF FROM THE PI-PICO SITE ITSELF WILL DOWNLOAD AN INCOMPATABLE VERSION
