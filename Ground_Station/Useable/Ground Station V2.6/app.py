@@ -35,7 +35,7 @@ while callsignSetup:
     print("")
 
     if not filterCallSigns:
-        promptInput = input("Would you like to filter data by callsign? (y/n): ")
+        promptInput = input("Would you like to filter data by callsign? (y/n):")
     else:
         promptInput = input("Would you like to add another callsign to the filter? (y/n): ")
 
@@ -122,75 +122,75 @@ class UI(QMainWindow):
                             # Date & Time
                             if (int.from_bytes(packet[0:2], "big", signed=True)) != 0:
 
-                                data.TIME = datetime(int.from_bytes(packet[0:2], "big", signed=True),
-                                                     int.from_bytes(packet[2:3], "big", signed=True),
-                                                     int.from_bytes(packet[3:4], "big", signed=True),
-                                                     int.from_bytes(packet[4:5], "big", signed=True),
-                                                     int.from_bytes(packet[5:6], "big", signed=True),
-                                                     int.from_bytes(packet[6:7], "big", signed=True))
+                                data.TIME = datetime(int.from_bytes(packet[0:4], "big", signed=True),
+                                                     int.from_bytes(packet[4:8], "big", signed=True),
+                                                     int.from_bytes(packet[8:12], "big", signed=True),
+                                                     int.from_bytes(packet[12:16], "big", signed=True),
+                                                     int.from_bytes(packet[16:20], "big", signed=True),
+                                                     int.from_bytes(packet[20:24], "big", signed=True))
 
                             else:
 
-                                data.TIME = int.from_bytes(packet[0:7], "big", signed=True)
+                                data.TIME = int.from_bytes(packet[24:28], "big", signed=True)
 
                             # GPS
-                            data.GPS = GPS((int.from_bytes(packet[7:11], "big", signed=True))/10000000,
-                                           (int.from_bytes(packet[11:15], "big", signed=True))/10000000,
-                                           (int.from_bytes(packet[15:19], "big", signed=True))/100,
-                                           (int.from_bytes(packet[19:22], "big", signed=True))/100,
-                                           (int.from_bytes(packet[22:23], "big", signed=True)),
-                                           (int.from_bytes(packet[23:25], "big", signed=True))/100)
+                            data.GPS = GPS((int.from_bytes(packet[28:32], "big", signed=True))/10000000,
+                                           (int.from_bytes(packet[32:36], "big", signed=True))/10000000,
+                                           (int.from_bytes(packet[36:40], "big", signed=True))/100,
+                                           (int.from_bytes(packet[40:44], "big", signed=True))/100,
+                                           (int.from_bytes(packet[44:48], "big", signed=True)),
+                                           (int.from_bytes(packet[48:52], "big", signed=True))/100)
 
                             # Altimeter
-                            data.ALTIMETER = ALTIMETER((int.from_bytes(packet[25:29], "big", signed=True))/100,
-                                                       (int.from_bytes(packet[29:31], "big", signed=True))/100,
-                                                       (int.from_bytes(packet[31:34], "big", signed=True))/100,
-                                                       (int.from_bytes(packet[34:36], "big", signed=True))/100,
-                                                       (int.from_bytes(packet[36:38], "big", signed=True))/100)
+                            data.ALTIMETER = ALTIMETER((int.from_bytes(packet[52:56], "big", signed=True))/100,
+                                                       (int.from_bytes(packet[56:60], "big", signed=True))/100,
+                                                       (int.from_bytes(packet[60:64], "big", signed=True))/100,
+                                                       (int.from_bytes(packet[64:68], "big", signed=True))/100,
+                                                       (int.from_bytes(packet[68:72], "big", signed=True))/100)
 
                             # Accelerometer
-                            data.ACCELEROMETER = ACCELEROMETER((int.from_bytes(packet[38:40], "big", signed=True))/100,
-                                                               (int.from_bytes(packet[40:42], "big", signed=True))/100,
-                                                               (int.from_bytes(packet[42:44], "big", signed=True))/100)
+                            data.ACCELEROMETER = ACCELEROMETER((int.from_bytes(packet[72:76], "big", signed=True))/100,
+                                                               (int.from_bytes(packet[76:80], "big", signed=True))/100,
+                                                               (int.from_bytes(packet[80:84], "big", signed=True))/100)
 
                             # Gyroscope
-                            data.GYROSCOPE = GYROSCOPE((int.from_bytes(packet[44:46], "big", signed=True))/100,
-                                                       (int.from_bytes(packet[46:48], "big", signed=True))/100,
-                                                       (int.from_bytes(packet[48:50], "big", signed=True))/100)
+                            data.GYROSCOPE = GYROSCOPE((int.from_bytes(packet[84:88], "big", signed=True))/100,
+                                                       (int.from_bytes(packet[88:92], "big", signed=True))/100,
+                                                       (int.from_bytes(packet[92:96], "big", signed=True))/100)
 
                             # Magnetometer
-                            data.MAGNETOMETER = MAGNETOMETER((int.from_bytes(packet[50:52], "big", signed=True)) / 100,
-                                                             (int.from_bytes(packet[52:54], "big", signed=True)) / 100,
-                                                             (int.from_bytes(packet[54:56], "big", signed=True)) / 100)
+                            data.MAGNETOMETER = MAGNETOMETER((int.from_bytes(packet[96:100], "big", signed=True)) / 100,
+                                                             (int.from_bytes(packet[100:104], "big", signed=True)) / 100,
+                                                             (int.from_bytes(packet[104:108], "big", signed=True)) / 100)
 
                             # Power Draw
-                            data.POWERDRAW = POWER((int.from_bytes(packet[56:58], "big", signed=True))/1000,
-                                                   (int.from_bytes(packet[58:60], "big", signed=True))/1000,
-                                                   (int.from_bytes(packet[60:62], "big", signed=True))/1000)
+                            data.POWERDRAW = POWER((int.from_bytes(packet[108:112], "big", signed=True))/1000,
+                                                   (int.from_bytes(packet[112:116], "big", signed=True))/1000,
+                                                   (int.from_bytes(packet[116:120], "big", signed=True))/1000)
 
                             # Solar Panel
-                            data.SOLARPANEL = SOLARPANEL(POWER((int.from_bytes(packet[62:64], "big", signed=True))/1000,
-                                                               (int.from_bytes(packet[64:66], "big", signed=True))/1000,
-                                                               (int.from_bytes(packet[66:68], "big", signed=True))/1000),
-                                                         POWER((int.from_bytes(packet[68:70], "big", signed=True))/1000,
-                                                               (int.from_bytes(packet[70:72], "big", signed=True))/1000,
-                                                               (int.from_bytes(packet[72:74], "big", signed=True))/1000),
-                                                         POWER((int.from_bytes(packet[74:76], "big", signed=True))/1000,
-                                                               (int.from_bytes(packet[76:78], "big", signed=True))/1000,
-                                                               (int.from_bytes(packet[78:80], "big", signed=True))/1000))
+                            data.SOLARPANEL = SOLARPANEL(POWER((int.from_bytes(packet[120:124], "big", signed=True))/1000,
+                                                               (int.from_bytes(packet[124:128], "big", signed=True))/1000,
+                                                               (int.from_bytes(packet[128:132], "big", signed=True))/1000),
+                                                         POWER((int.from_bytes(packet[132:136], "big", signed=True))/1000,
+                                                               (int.from_bytes(packet[136:140], "big", signed=True))/1000,
+                                                               (int.from_bytes(packet[140:144], "big", signed=True))/1000),
+                                                         POWER((int.from_bytes(packet[144:148], "big", signed=True))/1000,
+                                                               (int.from_bytes(packet[148:152], "big", signed=True))/1000,
+                                                               (int.from_bytes(packet[152:156], "big", signed=True))/1000))
 
                             # Battery
-                            data.BATTERY = BATTERY(((int.from_bytes(packet[80:82], "big", signed=True))/100),
-                                                   ((int.from_bytes(packet[82:84], "big", signed=True))/100))
+                            data.BATTERY = BATTERY(((int.from_bytes(packet[156:160], "big", signed=True))/100),
+                                                   ((int.from_bytes(packet[160:164], "big", signed=True))/100))
 
                             # Analog
-                            data.ANALOG = ANALOG(((int.from_bytes(packet[84:86], "big", signed=True))/100),
-                                                 ((int.from_bytes(packet[86:88], "big", signed=True))/100),
-                                                 ((int.from_bytes(packet[88:90], "big", signed=True))/100),
-                                                 ((int.from_bytes(packet[90:92], "big", signed=True))/100),
-                                                 ((int.from_bytes(packet[92:94], "big", signed=True))/100),
-                                                 ((int.from_bytes(packet[94:96], "big", signed=True))/100),
-                                                 ((int.from_bytes(packet[96:98], "big", signed=True))/100))
+                            data.ANALOG = ANALOG(((int.from_bytes(packet[164:168], "big", signed=True))/100),
+                                                 ((int.from_bytes(packet[168:172], "big", signed=True))/100),
+                                                 ((int.from_bytes(packet[172:176], "big", signed=True))/100),
+                                                 ((int.from_bytes(packet[176:180], "big", signed=True))/100),
+                                                 ((int.from_bytes(packet[180:184], "big", signed=True))/100),
+                                                 ((int.from_bytes(packet[184:188], "big", signed=True))/100),
+                                                 ((int.from_bytes(packet[188:192], "big", signed=True))/100))
 
                             temp_processed_data = "Callsign: " + callsign + "\n" + str(data) + "\n"
 
@@ -278,12 +278,12 @@ class UI(QMainWindow):
 
             if "Silicon Labs CP210x USB to UART Bridge" in str(port):
                 port = port.device
-
+		
         try:
 
             if port is not None:
 
-                ser = serial.Serial(port, 9600, timeout=0.5, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
+                ser = serial.Serial(str(port.device), 9600, timeout=0.5, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS)
 
                 self.terminal.append("~~~ Connection Made '" + str(port) + "' ~~~\n")
 
@@ -296,6 +296,15 @@ class UI(QMainWindow):
         except Exception as e:
 
             self.terminal.append("~~~ Error Connecting Device ~~~\n")
+            print(str(port) + "\n")
+            print(str(port.device) + "\n")
+            print(str(port.name) + "\n")
+            print(str(port.description) + "\n")
+            print(str(port.hwid) + "\n")
+            print(str(port.vid) + "\n")
+            print(str(port.pid) + "\n")
+            print(str(port.serial_number) + "\n")
+            print(str(port.interface) + "\n")
             print("Connection Error: " + str(e))
 
             clock.sleep(5)
