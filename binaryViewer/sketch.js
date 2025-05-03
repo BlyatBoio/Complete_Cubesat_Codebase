@@ -1,26 +1,34 @@
 let infoWindows = [];
 let selectedWindowID = 0;
 let graphColors;
+let windowIsMoved = false;
+let hasSelected = false
 
 function setup()
 {
   createCanvas(windowWidth, windowHeight);
   new infoWindow(100, 100, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)]);
   new infoWindow(400, 100, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)])
+  new infoWindow(700, 100, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)])
+  new infoWindow(100, 400, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)])
   graphColors = [color(200, 0, 0), color(0, 200, 0), color(0, 0, 200), color(0), color(100)];
 }
-
 
 function draw()
 {
   background(0, 10, 50);
-  for (let i = 0; i < infoWindows.length; i++)
+  for (let i = infoWindows.length-1; i >= 0; i--)
   {
     infoWindows[i].drawSelf();
+  }
+
+  for (let i = 0; i < infoWindows.length; i++)
+  {
     infoWindows[i].checkSelect();
   }
+
   infoWindows[selectedWindowID].selectedInteractions();
-  //drawGraph(400, 300, 400, 200, 0, 10, 0, 20, [seta, setb]);
+  hasSelected = false;
 }
 
 function randomSet(min, max, leg)
@@ -32,6 +40,111 @@ function randomSet(min, max, leg)
   }
   return new dataSet(arr);
 }
+
+function getLockPosition(x, y, w, h, id, direction){
+  let hasFoundLocation = false;
+
+  // start with an offset from each given side of 0
+  let checkX = 0;
+  let checkY = 0;
+  let totalCols = 0;
+
+  // Depending on direction, align to a given position
+  switch(direction){
+    case "Left":
+      // until checkX is off of the screen or not coliding with another infoWindow, apply an offset proportional to the width of the coliding
+      while(hasFoundLocation == false){
+        // ensure that no collisions occur
+        totalCols = 0;
+        // itterate over all windows to check for collisions
+        for(let i = 0; i < infoWindows.length; i++){
+
+          // collision check
+          if(infoWindows[i].id != id && collc(checkX, y, w, h, infoWindows[i].x, infoWindows[i].y, infoWindows[i].w, infoWindows[i].h) == true){
+            // apply an offset such that it aligns to the left of a colliding window
+            let d = dist(x, 0, infoWindows[i].x + infoWindows[i].w, 0)
+            checkX += d;
+            totalCols ++;
+            if(d < 1) return x + 1;
+          }
+        }
+        // update "escape" variable
+        if(totalCols == 0) {hasFoundLocation = true; break;}
+        if(checkX > width) return x; // if it can not align to be on the screen, it simply wont change position
+      }
+      return checkX;
+    case "Right":
+      checkX = width - w;
+      // until checkX is off of the screen or not coliding with another infoWindow, apply an offset proportional to the width of the coliding
+      while(hasFoundLocation == false){
+        // ensure that no collisions occur
+        totalCols = 0;
+
+        // itterate over all windows to check for collisions
+        for(let i = 0; i < infoWindows.length; i++){
+          
+          // collision check
+          if(infoWindows[i].id != id && collc(checkX, y, w, h, infoWindows[i].x, infoWindows[i].y, infoWindows[i].w, infoWindows[i].h) == true){
+            // apply an offset such that it aligns to the left of a colliding window
+            let d = dist(x + w, 0, infoWindows[i].x, 0);
+            checkX -= d;
+            totalCols ++;
+            if(d < 1) return x - 1;
+          }
+        }
+        // update "escape" variable
+        if(totalCols == 0) {hasFoundLocation = true; break;}
+        if(checkX < -w) return x; // if it can not align to be on the screen, it simply wont change position
+      }
+      return checkX;
+    case "Up":
+      // until checkX is off of the screen or not coliding with another infoWindow, apply an offset proportional to the width of the coliding
+      while(hasFoundLocation == false){
+        // ensure that no collisions occur
+        totalCols = 0;
+        // itterate over all windows to check for collisions
+        for(let i = 0; i < infoWindows.length; i++){
+
+          // collision check
+          if(infoWindows[i].id != id && collc(x, checkY, w, h, infoWindows[i].x, infoWindows[i].y, infoWindows[i].w, infoWindows[i].h) == true){
+            // apply an offset such that it aligns to the left of a colliding window
+            let d = dist(y, 0, infoWindows[i].y + infoWindows[i].h, 0)
+            checkY += d;
+            totalCols ++;
+            if(d < 1) return y + 1;
+          }
+        }
+        // update "escape" variable
+        if(totalCols == 0) {hasFoundLocation = true; break;}
+        if(checkY > height) return y; // if it can not align to be on the screen, it simply wont change position
+      }
+      return checkY;
+    case "Down":
+      checkY = height - h;
+      // until checkX is off of the screen or not coliding with another infoWindow, apply an offset proportional to the width of the coliding
+      while(hasFoundLocation == false){
+        // ensure that no collisions occur
+        totalCols = 0;
+
+        // itterate over all windows to check for collisions
+        for(let i = 0; i < infoWindows.length; i++){
+          
+          // collision check
+          if(infoWindows[i].id != id && collc(x, checkY, w, h, infoWindows[i].x, infoWindows[i].y, infoWindows[i].w, infoWindows[i].h) == true){
+            // apply an offset such that it aligns to the left of a colliding window
+            let d = dist(y + h, 0, infoWindows[i].y, 0);
+            checkY -= d;
+            totalCols ++;
+            if(d < 1) return y - 1;
+          }
+        }
+        // update "escape" variable
+        if(totalCols == 0) {hasFoundLocation = true; break;}
+        if(checkY < -h) return y; // if it can not align to be on the screen, it simply wont change position
+      }
+      return checkY;
+  }
+} 
 
 class infoWindow
 {
@@ -58,13 +171,17 @@ class infoWindow
     this.closeButton = createButton("X");
     this.closeButton.position(this.x + this.w - 30, this.y + 10);
     this.closeButton.size(this.w / 10, this.h / 10);
-    this.closeButton.mousePressed(this.close);
+    this.cbW = this.w/10;
+    this.cbh = this.h/10;
+    this.frame1 = true;
+    this.closeButton.mousePressed(this.close());
 
     this.id = infoWindows.length;
     infoWindows.push(this);
   }
   drawSelf()
   {
+    this.frame1 = false;
     fill(0, 5, 0);
     stroke(200);
     strokeWeight(5);
@@ -78,18 +195,33 @@ class infoWindow
     text(this.title, this.x, this.y + 10, this.w);
 
     this.closeButton.position(this.x + this.w - 30, this.y + 10);
+    let totalCols = 0;
+    for(let i = 0; i < this.id; i++){
+      if(infoWindows[i].id != this.id && collc(this.x + this.w - 30, this.y + 10, this.cbW, this.cbh, infoWindows[i].x, infoWindows[i].y, infoWindows[i].w, infoWindows[i].h) == true){
+        totalCols ++;
+        this.closeButton.hide();
+        break;
+      }
+    }
+    if(totalCols == 0) this.closeButton.show();
 
-    if (this.type == "Graph")
-    {
-      drawGraph(this.x + 10, this.y + 30, this.w - 20, this.h - 40, this.minValue, this.maxValue, this.maxLength, this.data);
+    switch(this.type){
+      case "Graph":
+        drawGraph(this.x + 10, this.y + 30, this.w - 20, this.h - 40, this.minValue, this.maxValue, this.maxLength, this.data);
+        break;
+      case "List":
+        //drawList(this.x + 10, this.y + 20, this.w-20, this.data);
+        break;
     }
   }
   checkSelect()
   {
-    if (mouseIsPressed && collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1) == true) this.select();
+    if (hasSelected == false && windowIsMoved == false && mouseIsPressed && collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1) == true) this.select();
   }
   select()
   {
+    hasSelected = true;
+    reOrderWindows(this.id);
     selectedWindowID = this.id;
   }
   moveBy(x, y)
@@ -111,7 +243,7 @@ class infoWindow
     // movement key, if ctrl is pressed, lock to screen side, if alt is pressed, scale up, else, move by movement speed
     if (keyIsDown(39))
     {
-      if (keyIsDown(17)) this.x = width - this.w;
+      if (keyIsDown(17)) this.x = getLockPosition(this.x, this.y, this.w, this.h, this.id, "Right");
       else
       {
         if (keyIsDown(16)) this.scaleBy(moveSpeed, 0);
@@ -120,7 +252,7 @@ class infoWindow
     }
     if (keyIsDown(37))
     {
-      if (keyIsDown(17)) this.x = 0;
+      if (keyIsDown(17)) this.x = getLockPosition(this.x, this.y, this.w, this.h, this.id, "Left");
       else
       {
         if (keyIsDown(16)) this.scaleBy(-moveSpeed, 0);
@@ -129,7 +261,7 @@ class infoWindow
     }
     if (keyIsDown(40))
     {
-      if (keyIsDown(17)) this.y = height - this.h;
+      if (keyIsDown(17)) this.y = getLockPosition(this.x, this.y, this.w, this.h, this.id, "Down");
       else
       {
         if (keyIsDown(16)) this.scaleBy(0, moveSpeed);
@@ -138,7 +270,7 @@ class infoWindow
     }
     if (keyIsDown(38))
     {
-      if (keyIsDown(17)) this.y = 0;
+      if (keyIsDown(17)) this.y = getLockPosition(this.x, this.y, this.w, this.h, this.id, "Up");
       else
       {
         if (keyIsDown(16)) this.scaleBy(0, -moveSpeed);
@@ -146,9 +278,8 @@ class infoWindow
       }
     }
 
-
-    if (mouseIsPressed && collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1)) this.moveBy(-(pwinMouseX - mouseX), -(pwinMouseY - mouseY));
-
+    if (mouseIsPressed && collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1)) {windowIsMoved = true; this.moveBy(-(pwinMouseX - mouseX), -(pwinMouseY - mouseY));}
+    else windowIsMoved = false;
 
     this.x = constrain(this.x, 0, width - this.w);
     this.y = constrain(this.y, 0, height - this.h);
@@ -157,10 +288,25 @@ class infoWindow
   }
   close()
   {
-    infoWindows = del(infoWindows, this.id);
+    if(this.frame1 == false){
+      this.closeButton.remove();
+      infoWindows = del(infoWindows, this.id);
+    }
   }
 }
 
+function reOrderWindows(id){
+  let newWindows = [];
+  newWindows.push(infoWindows[id]);
+  infoWindows[id].id = 0;
+  infoWindows = del(infoWindows, id);
+  for(let i = 0; i < infoWindows.length; i++){
+    infoWindows[i].id = newWindows.length;
+    newWindows.push(infoWindows[i]);
+  }
+  //reverse(newWindows);
+  infoWindows = newWindows;
+}
 
 class dataSet
 {
@@ -184,7 +330,6 @@ function arrMin(arr)
   return min;
 }
 
-
 function arrMax(arr)
 {
   let max = arr[0];
@@ -194,7 +339,6 @@ function arrMax(arr)
   }
   return max;
 }
-
 
 function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets)
 {
@@ -247,6 +391,29 @@ function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets)
   }
 }
 
+function drawList(x, y, w, dataSets){
+  let h = 0;
+  for(let i2 = 0; i2 < dataSets.length; i2++){
+    let curData = dataSets[i2].data;
+
+    let dataStr = "";
+    text(curData, 1000, 400);
+    for(let i = 0; i < curData.length; i++){
+      rect(100, 100, 100);  
+      if(i%2!=0) dataStr += ": ";
+      
+    }
+    h += 20 * round(textWidth(dataStr) / w);
+  
+    fill(255);
+    stroke(0);
+    textSize(15);
+    text(dataStr, x, y, w);
+  }
+  fill(20);
+  rect(x, y, w, h);
+}
+
 function del(arr, id)
 {
   let newArr = [];
@@ -269,5 +436,5 @@ function linePoint(x, y, x2, y2, px, py)
 
 function collc(x, y, w, h, x2, y2, w2, h2)
 {
-  return (x + w > x2 && x < x2 + w2 && y + h > y2 && y < y2 + h);
+  return (x + w > x2 && x < x2 + w2 && y + h > y2 && y < y2 + h2);
 }
