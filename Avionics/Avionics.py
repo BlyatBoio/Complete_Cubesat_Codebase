@@ -837,7 +837,7 @@ try:
 				return int(0).to_bytes(numBytes, 'big', signed = 'True')
 			
 	#Acquired and encodes data into bytes
-	def getRawData():
+	def getRawInt():
 			
 			processLed.value = True;
 			rawData = bytes()
@@ -846,21 +846,21 @@ try:
 			data = getAvionicsData()
 			
 			#Converts year, month, day, hour, minute, and second to bytes
-			#try:
-					#rawData += (
-							#data.TIME.year.to_bytes(2, 'big', signed='True') +
-							#data.TIME.month.to_bytes(2, 'big', signed='True') +
-							#data.TIME.day.to_bytes(2, 'big', signed='True') +
+			try:
+					rawData += (
+							data.TIME.year.to_bytes(4, 'big', signed='True') +
+							data.TIME.month.to_bytes(4, 'big', signed='True') +
+							data.TIME.day.to_bytes(4, 'big', signed='True') +
 							
-							#data.TIME.hour.to_bytes(2, 'big', signed='True') +
-							#data.TIME.minute.to_bytes(2, 'big', signed='True') +
-							#data.TIME.second.to_bytes(2, 'big', signed='True'))
-			#except:
+							data.TIME.hour.to_bytes(4, 'big', signed='True') +
+							data.TIME.minute.to_bytes(4, 'big', signed='True') +
+							data.TIME.second.to_bytes(4, 'big', signed='True'))
+			except:
 					
-					#try:
-							#rawData += (data.TIME).to_bytes(2, 'big', signed='True')
-					#except:
-							#rawData += (clock.monotonic()).to_bytes(2, 'big', signed='True')
+					try:
+							rawData += (data.TIME).to_bytes(4, 'big', signed='True')
+					except:
+							rawData += (clock.monotonic()).to_bytes(4, 'big', signed='True')
 			
 			#Converts GPS latitude, longitude, altitude, speed, satellites, and DOP to bytes
 			rawData += convertData(1, 4, 1)            
@@ -873,29 +873,29 @@ try:
 			
 			#Converts altimeter altitude, temperature, pressure, humidty, and gas to bytes
 			rawData += convertData(2, 4, 1)            
-			rawData += convertData(data.ALTIMETER.Altitude, 4, 100)
+			rawData += convertData(data.ALTIMETER.Altitude, 4, 1)
 			rawData += convertData(data.ALTIMETER.Temperature, 4, 1)
-			rawData += convertData(data.ALTIMETER.Pressure, 4, 100)
-			rawData += convertData(data.ALTIMETER.Humidity, 4, 100)
-			rawData += convertData(data.ALTIMETER.Gas, 4, 100)
+			rawData += convertData(data.ALTIMETER.Pressure, 4, 1)
+			rawData += convertData(data.ALTIMETER.Humidity, 4, 1)
+			rawData += convertData(data.ALTIMETER.Gas, 4, 1)
 		
 			#Convert accelerometer X, Y, and Z to bytes
 			rawData += convertData(3, 4, 1)            
-			rawData += convertData(data.ACCELEROMETER.X, 4, 100)
-			rawData += convertData(data.ACCELEROMETER.Y, 4, 100)
-			rawData += convertData(data.ACCELEROMETER.Z, 4, 100)
+			rawData += convertData(data.ACCELEROMETER.X, 4, 0.1)
+			rawData += convertData(data.ACCELEROMETER.Y, 4, 0.1)
+			rawData += convertData(data.ACCELEROMETER.Z, 4, 0.1)
 		
 			#Convert gyroscope X, Y, and Z to bytes
 			rawData += convertData(4, 4, 1)            
-			rawData += convertData(data.GYROSCOPE.X*100, 4, 100)
-			rawData += convertData(data.GYROSCOPE.Y*100, 4, 100)
-			rawData += convertData(data.GYROSCOPE.Z*100, 4, 100)
+			rawData += convertData(data.GYROSCOPE.X, 4, 0.1)
+			rawData += convertData(data.GYROSCOPE.Y, 4, 0.1)
+			rawData += convertData(data.GYROSCOPE.Z, 4, 0.1)
 				
 			#Convert Magnometer X, Y, and Z to bytes
 			rawData += convertData(5, 4, 1)            
-			rawData += convertData(data.MAGNETOMETER.X, 4, 100)
-			rawData += convertData(data.MAGNETOMETER.Y, 4, 100)
-			rawData += convertData(data.MAGNETOMETER.Z, 4, 100)
+			rawData += convertData(data.MAGNETOMETER.X, 4, 0.1)
+			rawData += convertData(data.MAGNETOMETER.Y, 4, 0.1)
+			rawData += convertData(data.MAGNETOMETER.Z, 4, 0.1)
 					
 			#Convert power draw voltage, current, and wattage to bytes
 			rawData += convertData(6, 4, 1)            
@@ -1312,115 +1312,110 @@ try:
 			global maxDataNumber
 			global maxErrorNumber
 
-			printValue = "";
+			printValue = " ";
 
 			try:
-					
 				command = command.decode("ascii").lower().replace(" ", "") #Decodes and removes formatting from the message
 
 				if command[0:3] == "set":
 					command = command[3:]
 			
-					if command[0:8] == "callsign":
-							
-							command = command[8:]
-							callsign = command.upper()
-							printValue = "Callsign Set To: " + str(callsign)							
-							saveConfig()								
-					elif command[0:14] == "beaconInterval":
+					if command[0:4] == "call":
 							
 							command = command[4:]
+							callsign = command.upper()
+							printValue += "Callsign Set To: " + str(callsign)							
+							#saveConfig()								
+					elif command[0:5] == "b_int":
+							command = command[5:]
 							beaconInterval = int(command)
-							printValue = "Beacon Interval Set To: " + str(beaconInterval)							
-							saveConfig()								
-					elif command[0:15] == "measureInterval":
+							printValue += "Beacon Interval Set To: " + str(beaconInterval)							
+							#saveConfig()								
+					elif command[0:5] == "m_int":
 							
-							command = command[15:]
+							command = command[5:]
 							measurementInterval = int(command)
-							printValue = "Measurement Interval Set To: " + str(measurementInterval)
-							saveConfig()								
-					elif command[0:7] == "dataMac":
+							printValue += "Measurement Interval Set To: " + str(measurementInterval)
+							#saveConfig()								
+					elif command[0:8] == "data_max":
+							
+							command = command[8:]
+							maxDataNumber = int(command)					
+							printValue += "Max Data Set To: " + str(maxDataNumber)
+							#saveConfig()								
+					elif command[0:7] == "err_max":
 							
 							command = command[7:]
-							maxDataNumber = int(command)					
-							printValue = "Max Data Set To: " + str(maxDataNumber)
-							saveConfig()								
-					elif command[0:6] == "errMax":
-							
-							command = command[6:]
 							maxErrorNumber = int(command)
-							printValue = "Max Error Set To: " + str(maxErrorNumber)		
-							saveConfig()
+							printValue += "Max Error Set To: " + str(maxErrorNumber)		
+							#saveConfig()
 					else:
 							
-							print("[Command Not Understood]")
+							printValue += "Command Not Understood (Set)"
 				elif command[0:3] == "get":
-					if command == "Current":
-						printValue = getRawData()
+					command = command[3:]
+					if command == "current":
+						printValue += getRawInt()
 					elif command[0:4] == "file" :
-						command = command[4:]						
-						printValue = getSpecificData(int(command))				
+						printValue += getSpecificData(int(command[4:]))				
 					elif command == "runtime":
-							printValue = "Runtime: " + str(clock.monotonic() - uptimeTicker) + "s"       
-					elif command == "monotonic":
-							printValue = "Monotonic Time: " + str(clock.monotonic()) + "s"                 
-					elif command == "UTC":
-							printValue = "Time: " + str(getTime())              
-					elif command == "dataNum":
-							printValue = "Data Entries: " + str(dataNumber)              
-					elif command == "errorNum":
-							printValue = "Error Entries: " + str(errorNumber)                               
-					elif command[0:5] == "data":
-						command = command[5:]
-						if command == "GPS":
-							printValue = getGpsData()
-						if command == "Altimeter":
-							printValue = getAltimeterData()
-						if command == "Accelerometer":
-							printValue = getAccelerometerData()
-						if command == "Gyroscope":
-							printValue = getGyroscopeData()
-						if command == "Magnometer":
-							printValue = getMagnetometerData()
-						if command == "powerDraw":
-							printValue = getPowerDrawData()
-						if command == "Solar":
-							printValue = getSolarData()
-						if command == "Battery":
-							printValue = getBatteryData()
-						if command == "Analog":
-							printValue = getAnalogData()
-						if command == "All":
-							printValue = getAvionicsData()
+							printValue += "Runtime: " + str(clock.monotonic() - uptimeTicker) + "s"       
+					elif command == "mono":
+							printValue += "Monotonic Time: " + str(clock.monotonic()) + "s"                 
+					elif command == "utc":
+							printValue += "time: " + str(getTime())              
+					elif command == "data_num":
+							printValue += "Data Entries: " + str(dataNumber)              
+					elif command == "err_num":
+							printValue += "Error Entries: " + str(errorNumber)                               
+					elif command[0:4] == "data":
+						command = command[4:]
+						if command == "gps":
+							printValue += getGpsData()
+						elif command == "alt":
+							printValue += getAltimeterData()
+						elif command == "acc":
+							printValue += getAccelerometerData()
+						elif command == "gyro":
+							printValue += getGyroscopeData()
+						elif command == "mag":
+							printValue += getMagnetometerData()
+						elif command == "power":
+							printValue += getPowerDrawData()
+						elif command == "solar":
+							printValue += getSolarData()
+						elif command == "battery":
+							printValue += getBatteryData()
+						elif command == "analog":
+							printValue += getAnalogData()
+						elif command == "all":
+							printValue += getAvionicsData()
 						else:
-
-							printValue = "Command Not Understood"
+							printValue += "Command Not Understood (Data)"
 					else:
 							
-							printValue = "Command Not Understood"
+							printValue += "Command Not Understood (Get)"
 				elif command[0:3] == "msg":
-
-					command = command[3:]						
-					printValue = str(str(command))
+					printValue += str(str(command[3:]))
 				elif command[0:5] == "cube.":
 					command = command[5:]
 					if command == "reload":
 
-						transmit("Reloading Cubesat")                 
-						saveState()
-						saveConfig()
+						#transmit("Reloading Cubesat") should work, doesent send before the controller resets
+						#saveState()
+						#saveConfig()
 						microcontroller.reset()
 					elif command == "ping":	
-						printValue = "pong"							
+						printValue += "pong"							
 					elif command == "pong":
-						printValue = "ping"					
+						printValue += "ping"					
 				else:
 
-						printValue = "Command Not Understood"
+						printValue += "Command Not Understood (Cube.)"
 							
 			except:
 
-					printValue = "Command Not Understood"
+					printValue += "Command Not Understood (Try)"
 
 			transmit(printValue);
 			print(printValue);
@@ -1692,17 +1687,18 @@ try:
 					measurementTicker = clock.monotonic()
 					if(debugLevel >= 4):
 						print("Data Stored")
-					storeData(getRawData()) #Gets and stores data
+					storeData(getRawInt()) #Gets and stores data
 
 			# Send the beacon back down on the predefined beaconInterval=
 			if clock.monotonic() - beaconTicker > beaconInterval:
 					
+     
 					beaconTicker = clock.monotonic()
 							
 					if(debugLevel >= 4):
 						print("Beacon Sent")
 
-					#sendBeacon()
+					sendBeacon()
 
 #Reboots device in the case of a critical error
 except Exception as e:
