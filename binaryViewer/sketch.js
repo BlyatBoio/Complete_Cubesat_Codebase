@@ -6,6 +6,7 @@ let hasSelected = false
 let fileInp;
 let loadFile;
 let clearButton;
+let loadCubesatDisplayButton;
 // Cubesat Specific Displays
 let GPS_Display;
 let ALT_Display;
@@ -26,36 +27,42 @@ let POWER_Data;
 let SOLAR_Data;
 let BAT_Data;
 let ALG_Data;
+// Cubesat Specific Data Names
+let GPS_names = ["Lat", "Long", "Alt", "Speed", "DOP"];
+let ALT_names = ["Alt", "Temp", "Pres", "Hum", "Gas"];
+let ACC_names = ["X", "Y", "Z"];
+let GYRO_names = ["X", "Y", "Z"];
+let MAG_names = ["X", "Y", "Z"];
+let POWER_names = ["Volt", "Cur", "Watt"];
+let SOLAR_names = ["One Volt", "One Cur", "One Watt", "One Volt", "One Cur", "One Watt", "Three Volt", "Three Cur", "Three Watt"];
+let BAT_names = ["Volt", "Percent"];
+let ALG_names = ["A0", "A1", "A2", "A3", "A4", "A5", "A6"];
 
 function setup()
 {
   createCanvas(windowWidth, windowHeight);
   graphColors = [color(200, 0, 0), color(0, 200, 0), color(0, 0, 200), color(0), color(100), color(255), color(200), color(0), color(0)];
-  fileInp = createFileInput(loadCubesatFile);
+  fileInp = createFileInput(loadCubesatFile, true);
   fileInp.position(50, height - 70);
   clearButton = createButton("Clear Screen");
   clearButton.mousePressed(clearScreen);
   clearButton.position(200, height - 70);
-  /*
-  new infoWindow(100, 100, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)]);
-  new infoWindow(400, 100, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)]);
-  new infoWindow(700, 100, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)]);
-  new infoWindow(100, 400, 200, 200, "Graph", "TEST DISPLAY", [randomSet(0, 100, 10), randomSet(0, 100, 10), randomSet(0, 100, 10)]);
-  */
+  loadCubesatDisplayButton = createButton("Load Cubesat Windows");
+  loadCubesatDisplayButton.position(350, height - 70);
+  loadCubesatDisplayButton.mousePressed(defineCubesatDisplays);
   defineCubesatDisplays();
 }
 
 function draw()
 {
   background(0, 10, 50);
+  for (let i = 0; i < infoWindows.length; i++)
+  {
+      infoWindows[i].checkSelect();
+  }
   for (let i = infoWindows.length - 1; i >= 0; i--)
   {
     infoWindows[i].drawSelf();
-  }
-
-  for (let i = 0; i < infoWindows.length; i++)
-  {
-    infoWindows[i].checkSelect();
   }
 
   if (infoWindows[selectedWindowID] != undefined) infoWindows[selectedWindowID].selectedInteractions();
@@ -193,7 +200,7 @@ function getLockPosition(x, y, w, h, id, direction)
 
 class infoWindow
 {
-  constructor(x, y, w, h, type, title, data)
+  constructor(x, y, w, h, type, title, data, names)
   {
     this.x = x;
     this.y = y;
@@ -202,6 +209,7 @@ class infoWindow
     this.type = type;
     this.title = title;
     this.data = data; // array of data set objects
+    this.names = names; // array of specific data names
 
     this.minValue = 100000;
     this.maxValue = -100000;
@@ -227,6 +235,7 @@ class infoWindow
   {
     fill(0, 5, 0);
     stroke(200);
+    if (selectedWindowID == this.id) stroke(0);
     strokeWeight(5);
     rect(this.x, this.y, this.w, this.h);
     stroke(0);
@@ -253,7 +262,7 @@ class infoWindow
     switch (this.type)
     {
       case "Graph":
-        drawGraph(this.x + 10, this.y + 30, this.w - 20, this.h - 40, this.minValue, this.maxValue, this.maxLength, this.data);
+        drawGraph(this.x + 10, this.y + 30, this.w - 20, this.h - 40, this.minValue, this.maxValue, this.maxLength, this.data, this.names);
         break;
       case "List":
         //drawList(this.x + 10, this.y + 20, this.w-20, this.data);
@@ -262,7 +271,16 @@ class infoWindow
   }
   checkSelect()
   {
-    if (hasSelected == false && windowIsMoved == false && mouseIsPressed && collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1) == true) this.select();
+    if (collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1) == true)
+    {
+      push()
+      noFill();
+      stroke(0);
+      strokeWeight(5);
+      rect(this.x, this.y, this.w, this.h);
+      pop();
+      if (hasSelected == false && windowIsMoved == false && mouseIsPressed) this.select();
+    }
   }
   select()
   {
@@ -324,7 +342,11 @@ class infoWindow
       }
     }
 
-    if (mouseIsPressed && collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1)) { windowIsMoved = true; this.moveBy(-(pwinMouseX - mouseX), -(pwinMouseY - mouseY)); }
+    if (mouseIsPressed && collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1))
+    {
+      windowIsMoved = true;
+      this.moveBy(-(pwinMouseX - mouseX), -(pwinMouseY - mouseY));
+    }
     else windowIsMoved = false;
 
     this.x = constrain(this.x, 0, width - this.w);
@@ -404,36 +426,52 @@ function arrMax(arr)
   return max;
 }
 
-function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets)
+function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets, setNames)
 {
   // background
   fill(220);
   rect(x, y, w, h);
+
+  // general size of text, lines, etc based on the width and heigh
   let xScale = w / length / 2
   let yScale = h / length / 2
+
+  // formatting
   textSize(xScale / 2);
   textAlign(LEFT);
   fill(0);
+
+  // Grid lines and Lables
+
+  // vertical lines
   for (let i = 0; i < w; i += w / length)
   {
     line(x + i, y, x + i, y + h);
     if (i != 0) text(round(i / (w / length)), x + i + xScale / 2, y + h - yScale / 4);
   }
+
+  // horizontal lines
   for (let i = 0; i < h; i += h / length)
   {
     line(x, y + i, x + w, y + i);
     text(round(maxValue - map(i, -h / length, h, 0, maxValue)), x + xScale / 4, y + i + (2 * yScale) - yScale / 2);
   }
+
+  // display actual data on graph
   for (let i = 0; i < dataSets.length; i++)
   {
+    // get the raw values from the data set
     let curData = dataSets[i].dataValues
-    stroke(graphColors[i])
-    let prevPoint = createVector(0, 0);
+    stroke(graphColors[i]); // ensure each line has a different color.
+    let prevPoint = createVector(0, 0); // used to draw lines b/w the data points
     for (let i2 = 0; i2 < curData.length; i2++)
     {
+      // get the new position to draw on the graph
       let newX = x + (xScale * 2) + map(i2, 0, curData.length, 0, w);
       let newY = y + h - map(curData[i2], minValue, maxValue, yScale * 2, h);
-      strokeWeight(10);
+      strokeWeight(10); // formatting
+
+      // highlight the point and display its exact value
       if (dist(mouseX, mouseY, newX, newY) < 15)
       {
         strokeWeight(20);
@@ -442,13 +480,16 @@ function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets)
         fill(graphColors[i]);
         textAlign(CENTER);
         stroke(0);
-        text(i2 + ", " + round(curData[i2] * 100) / 100, newX, newY - 30);
+        if (setNames == undefined) text(i2 + ", " + round(curData[i2] * 100) / 100, newX, newY - 30);
+        else text(setNames[i] + ": " + i2 + ", " + round(curData[i2] * 100) / 100, newX, newY - 30);
         pop();
       }
+      // draw the data points
       point(newX, newY);
-      strokeWeight(3);
-      if (linePoint(prevPoint.x, prevPoint.y, newX, newY, mouseX, mouseY)) { strokeWeight(8) }
-      if (i2 != 0) line(prevPoint.x, prevPoint.y, newX, newY);
+      strokeWeight(3); // formatting
+      if (linePoint(prevPoint.x, prevPoint.y, newX, newY, mouseX, mouseY)) { strokeWeight(8) } // highlight lines
+      if (i2 != 0) line(prevPoint.x, prevPoint.y, newX, newY); // draw lines between points
+      // for line drawing
       prevPoint.x = newX;
       prevPoint.y = newY;
     }
@@ -524,6 +565,14 @@ function loadBinaryFile(fileToLoad)
   return finalStr;
 }
 
+function multiLoadFiles(files)
+{
+  for (let i = 0; i < files.length; i++)
+  {
+    loadCubesatFile(files[i]);
+  }
+}
+
 function loadCubesatFile(fileToLoad)
 {
   let data = loadBinaryFile(fileToLoad);
@@ -537,7 +586,6 @@ function loadCubesatFile(fileToLoad)
   let newBatData = data.slice(40, 42);
   let newAlgData = data.slice(43, 49);
 
-  console.log(GPS_Display);
   for (let i = 0; i < GPS_Display.data.length; i++)
   {
     GPS_Display.data[i].addValue(newGPSData[i]);
@@ -583,8 +631,6 @@ function loadCubesatFile(fileToLoad)
   SOLAR_Display.updateDataVals();
   BAT_Display.updateDataVals();
   ALG_Display.updateDataVals();
-
-  console.log(GPS_Display);
 }
 
 function defineCubesatDisplays()
@@ -599,15 +645,15 @@ function defineCubesatDisplays()
   BAT_Data = createSetArray(2);
   ALG_Data = createSetArray(7);
 
-  GPS_Display = new infoWindow(0, 0, 250, 200, "Graph", "GPS Data", GPS_Data);
-  ALT_Display = new infoWindow(250, 0, 250, 200, "Graph", "Altimeter Data", ALT_Data);
-  ACC_Display = new infoWindow(500, 0, 250, 200, "Graph", "Accelerometer Data", ACC_Data);
-  GYRO_Display = new infoWindow(750, 0, 250, 200, "Graph", "Gyroscope Data", GYRO_Data);
-  MAG_Display = new infoWindow(1000, 0, 250, 200, "Graph", "Magnometer Data", MAG_Data);
-  POWER_Display = new infoWindow(1250, 0, 250, 200, "Graph", "Power Data", POWER_Data);
-  SOLAR_Display = new infoWindow(0, 200, 250, 200, "Graph", "Solar Data", SOLAR_Data);
-  BAT_Display = new infoWindow(250, 200, 250, 200, "Graph", "Battery Data", BAT_Data);
-  ALG_Display = new infoWindow(500, 200, 250, 200, "Graph", "Analog Data", ALG_Data);
+  GPS_Display = new infoWindow(0, 0, 250, 200, "Graph", "GPS Data", GPS_Data, GPS_names);
+  ALT_Display = new infoWindow(250, 0, 250, 200, "Graph", "Altimeter Data", ALT_Data, ALT_names);
+  ACC_Display = new infoWindow(500, 0, 250, 200, "Graph", "Accelerometer Data", ACC_Data, ACC_names);
+  GYRO_Display = new infoWindow(750, 0, 250, 200, "Graph", "Gyroscope Data", GYRO_Data, GYRO_names);
+  MAG_Display = new infoWindow(1000, 0, 250, 200, "Graph", "Magnometer Data", MAG_Data, MAG_names);
+  POWER_Display = new infoWindow(1250, 0, 250, 200, "Graph", "Power Data", POWER_Data, POWER_names);
+  SOLAR_Display = new infoWindow(0, 200, 250, 200, "Graph", "Solar Data", SOLAR_Data, SOLAR_names);
+  BAT_Display = new infoWindow(250, 200, 250, 200, "Graph", "Battery Data", BAT_Data, BAT_names);
+  ALG_Display = new infoWindow(500, 200, 250, 200, "Graph", "Analog Data", ALG_Data, ALG_names);
 }
 
 function createSetArray(amnt)
