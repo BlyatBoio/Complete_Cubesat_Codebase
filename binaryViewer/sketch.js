@@ -569,17 +569,24 @@ function loadCSV(fileToLoad){
   let data = fileToLoad.data;
   let dataSets = data.split("\n");
   let names = dataSets[0].split(",");
-  console.log(names);
-  let newWindows = [];
+  rect(100, 100, 100);
   let windowData = [];
+  for(let i = 0; i < 21; i++){
+    windowData.push([]);
+  }
   for(let i2 = 1; i2 < dataSets.length; i2++){
     for(let i = 0; i < 21; i++){
       let newStr = dataSets[i2].split(",");
+      for(let i3 = 0; i3 < newStr.length; i3++){
+        windowData[i].push(newStr[i3]);
+      }
     }
   }
 
+  rect(100, 100, 100);
+
   for(let i = 0; i < 21; i++){
-    newWindows.push(new infoWindow(i * 100, 0, 100, 100, "Graph", names[i], new dataSet([]), ["", "", "", "", "", "", "", "", "", "", ""]));
+    new infoWindow(i * 100, 0, 100, 100, "Graph", names[i], new dataSet(windowData[i]), ["", "", "", "", "", "", "", "", "", "", ""]);
   }
 }
 
