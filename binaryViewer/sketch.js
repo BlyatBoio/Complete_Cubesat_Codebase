@@ -42,7 +42,7 @@ function setup()
 {
   createCanvas(windowWidth, windowHeight);
   graphColors = [color(200, 0, 0), color(0, 200, 0), color(0, 0, 200), color(0), color(100), color(255), color(200), color(0), color(0)];
-  fileInp = createFileInput(loadCubesatFile, true);
+  fileInp = createFileInput(loadCSV, true);
   fileInp.position(50, height - 70);
   clearButton = createButton("Clear Screen");
   clearButton.mousePressed(clearScreen);
@@ -50,7 +50,7 @@ function setup()
   loadCubesatDisplayButton = createButton("Load Cubesat Windows");
   loadCubesatDisplayButton.position(350, height - 70);
   loadCubesatDisplayButton.mousePressed(defineCubesatDisplays);
-  defineCubesatDisplays();
+  //defineCubesatDisplays();
 }
 
 function draw()
@@ -399,9 +399,9 @@ class dataSet
   addValue(value)
   {
     this.dataValues.push(value);
+    this.maxLength = this.dataValues.length;
     this.minValue = arrMin(this.dataValues);
     this.maxValue = arrMax(this.dataValues);
-    this.maxLength = this.dataValues.length;
   }
 }
 
@@ -563,6 +563,24 @@ function loadBinaryFile(fileToLoad)
   }
   console.log(finalStr);
   return finalStr;
+}
+
+function loadCSV(fileToLoad){
+  let data = fileToLoad.data;
+  let dataSets = data.split("\n");
+  let names = dataSets[0].split(",");
+  console.log(names);
+  let newWindows = [];
+  let windowData = [];
+  for(let i2 = 1; i2 < dataSets.length; i2++){
+    for(let i = 0; i < 21; i++){
+      let newStr = dataSets[i2].split(",");
+    }
+  }
+
+  for(let i = 0; i < 21; i++){
+    newWindows.push(new infoWindow(i * 100, 0, 100, 100, "Graph", names[i], new dataSet([]), ["", "", "", "", "", "", "", "", "", "", ""]));
+  }
 }
 
 function multiLoadFiles(files)
