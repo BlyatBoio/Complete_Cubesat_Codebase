@@ -36,7 +36,7 @@ try:
 
 	###################################################################################################################
 
-	callsign = "monkeyPox" #[CHANGE BEFORE LAUNCH] Sets the callsign for the device (Line one in Configuration.txt)
+	callsign = "Space_Thingy" #[CHANGE BEFORE LAUNCH] Sets the callsign for the device (Line one in Configuration.txt)
 	beaconInterval = 5 #Controls the interval of beacon signal (Line two in Configuration.txt)
 
 	measurementInterval = 5 #Controls interval of data collection (Line three in Configuration.txt)
@@ -140,8 +140,6 @@ try:
 
 	#Defines the errorNumber counter globally
 	errorNumber = -1 #Line three in StateBackup.txt
-
-	currentLED = 0;
 
 	#Defines GPS object
 	class GPS: 
@@ -1709,7 +1707,7 @@ except Exception as e:
 			errorCode(1, e)
 			#Comment out to have continuous connection to the cubeSat
 			#If it continuously disconnects and reconnects, comenting this out stops that
-			#microcontroller.reset()
+			microcontroller.reset()
 
 	
 	except:
@@ -1718,5 +1716,5 @@ except Exception as e:
 			#Comment out to have continuous connection to the cubeSat
 			#If it continuously disconnects and reconnects, comenting this out stops that
 			#(File explorer opens to the raspberry pie, closes to desktop, opens new tab, etc. etc.)
-			#microcontroller.reset()
+			microcontroller.reset()
 	
