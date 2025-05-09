@@ -2,7 +2,7 @@ let infoWindows = [];
 let selectedWindowID = 0;
 let graphColors;
 let windowIsMoved = false;
-let hasSelected = false
+let hasSelected = false;
 let fileInp;
 let loadFile;
 let clearButton;
@@ -42,7 +42,7 @@ function setup()
 {
   createCanvas(windowWidth, windowHeight);
   graphColors = [color(200, 0, 0), color(0, 200, 0), color(0, 0, 200), color(0), color(100), color(255), color(200), color(0), color(0)];
-  fileInp = createFileInput(loadCSV, true);
+  fileInp = createFileInput(loadCubesatFile, true);
   fileInp.position(50, height - 70);
   clearButton = createButton("Clear Screen");
   clearButton.mousePressed(clearScreen);
@@ -50,7 +50,7 @@ function setup()
   loadCubesatDisplayButton = createButton("Load Cubesat Windows");
   loadCubesatDisplayButton.position(350, height - 70);
   loadCubesatDisplayButton.mousePressed(defineCubesatDisplays);
-  //defineCubesatDisplays();
+  defineCubesatDisplays();
 }
 
 function draw()
@@ -58,7 +58,7 @@ function draw()
   background(0, 10, 50);
   for (let i = 0; i < infoWindows.length; i++)
   {
-      infoWindows[i].checkSelect();
+    infoWindows[i].checkSelect();
   }
   for (let i = infoWindows.length - 1; i >= 0; i--)
   {
@@ -105,7 +105,7 @@ function getLockPosition(x, y, w, h, id, direction)
           if (infoWindows[i].id != id && collc(checkX, y, w, h, infoWindows[i].x, infoWindows[i].y, infoWindows[i].w, infoWindows[i].h) == true)
           {
             // apply an offset such that it aligns to the left of a colliding window
-            let d = dist(x, 0, infoWindows[i].x + infoWindows[i].w, 0)
+            let d = dist(x, 0, infoWindows[i].x + infoWindows[i].w, 0);
             checkX += d;
             totalCols++;
             if (d < 1) return x + 1;
@@ -157,7 +157,7 @@ function getLockPosition(x, y, w, h, id, direction)
           if (infoWindows[i].id != id && collc(x, checkY, w, h, infoWindows[i].x, infoWindows[i].y, infoWindows[i].w, infoWindows[i].h) == true)
           {
             // apply an offset such that it aligns to the left of a colliding window
-            let d = dist(y, 0, infoWindows[i].y + infoWindows[i].h, 0)
+            let d = dist(y, 0, infoWindows[i].y + infoWindows[i].h, 0);
             checkY += d;
             totalCols++;
             if (d < 1) return y + 1;
@@ -243,7 +243,7 @@ class infoWindow
     fill(200);
     textSize(20);
     textAlign(CENTER);
-    textWrap(WORD)
+    textWrap(WORD);
     text(this.title, this.x, this.y + 10, this.w);
 
     this.closeButton.position(this.x + this.w - 30, this.y + 10);
@@ -273,7 +273,7 @@ class infoWindow
   {
     if (collc(this.x, this.y, this.w, this.h, mouseX, mouseY, 1, 1) == true)
     {
-      push()
+      push();
       noFill();
       stroke(0);
       strokeWeight(5);
@@ -399,9 +399,9 @@ class dataSet
   addValue(value)
   {
     this.dataValues.push(value);
-    this.maxLength = this.dataValues.length;
     this.minValue = arrMin(this.dataValues);
     this.maxValue = arrMax(this.dataValues);
+    this.maxLength = this.dataValues.length;
   }
 }
 
@@ -433,8 +433,8 @@ function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets, setNames)
   rect(x, y, w, h);
 
   // general size of text, lines, etc based on the width and heigh
-  let xScale = w / length / 2
-  let yScale = h / length / 2
+  let xScale = w / length / 2;
+  let yScale = h / length / 2;
 
   // formatting
   textSize(xScale / 2);
@@ -461,7 +461,7 @@ function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets, setNames)
   for (let i = 0; i < dataSets.length; i++)
   {
     // get the raw values from the data set
-    let curData = dataSets[i].dataValues
+    let curData = dataSets[i].dataValues;
     stroke(graphColors[i]); // ensure each line has a different color.
     let prevPoint = createVector(0, 0); // used to draw lines b/w the data points
     for (let i2 = 0; i2 < curData.length; i2++)
@@ -487,7 +487,7 @@ function drawGraph(x, y, w, h, minValue, maxValue, length, dataSets, setNames)
       // draw the data points
       point(newX, newY);
       strokeWeight(3); // formatting
-      if (linePoint(prevPoint.x, prevPoint.y, newX, newY, mouseX, mouseY)) { strokeWeight(8) } // highlight lines
+      if (linePoint(prevPoint.x, prevPoint.y, newX, newY, mouseX, mouseY)) { strokeWeight(8); } // highlight lines
       if (i2 != 0) line(prevPoint.x, prevPoint.y, newX, newY); // draw lines between points
       // for line drawing
       prevPoint.x = newX;
@@ -563,31 +563,6 @@ function loadBinaryFile(fileToLoad)
   }
   console.log(finalStr);
   return finalStr;
-}
-
-function loadCSV(fileToLoad){
-  let data = fileToLoad.data;
-  let dataSets = data.split("\n");
-  let names = dataSets[0].split(",");
-  rect(100, 100, 100);
-  let windowData = [];
-  for(let i = 0; i < 21; i++){
-    windowData.push([]);
-  }
-  for(let i2 = 1; i2 < dataSets.length; i2++){
-    for(let i = 0; i < 21; i++){
-      let newStr = dataSets[i2].split(",");
-      for(let i3 = 0; i3 < newStr.length; i3++){
-        windowData[i].push(newStr[i3]);
-      }
-    }
-  }
-
-  rect(100, 100, 100);
-
-  for(let i = 0; i < 21; i++){
-    new infoWindow(i * 100, 0, 100, 100, "Graph", names[i], new dataSet(windowData[i]), ["", "", "", "", "", "", "", "", "", "", ""]);
-  }
 }
 
 function multiLoadFiles(files)
