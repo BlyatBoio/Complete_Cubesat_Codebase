@@ -28,7 +28,6 @@ Making Changes And Compilation:
     1. Open app.py in your IDE of choice, make what changes you desire, ensure you save the .py file
     2. To compile, open CMD line and use CD to navigate to the root folder of your app.py file
     3. Run the command "pyinstaller --onefile app.py" 
-        a. compiler --into one .exe --path file name
     4. Your compiled EXE will appear in a new folder named dist
     5. Ensure that you copy/paste the large.UI file into the dist Folder, the app will not run without it
     6. If you need to make changes or re-compile the app, simply running the same command will go through the same process, deleting old files and updating them to the new versions along the way
